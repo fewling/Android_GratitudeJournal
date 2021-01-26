@@ -63,7 +63,8 @@ public class LoginActivity extends AppCompatActivity {
                 mLoginProgressBar.setVisibility(View.INVISIBLE);
                 mLoginButton.setVisibility(View.VISIBLE);
 
-                updateUI();
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                updateUI(currentUser);
             } else {
                 showMessage(task.getException().getMessage());
                 mLoginProgressBar.setVisibility(View.INVISIBLE);
@@ -81,12 +82,13 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            updateUI();
+            updateUI(currentUser);
         }
     }
 
-    private void updateUI() {
+    private void updateUI(FirebaseUser currentUser) {
         Intent intent = new Intent(getApplicationContext(), NavDrawerActivity.class);
+        intent.putExtra("current_user", currentUser);
         startActivity(intent);
         finish();
     }

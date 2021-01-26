@@ -12,4 +12,5 @@
     <string name="menu_breathing_exercise">Breathing Exercise</string>
     <string name="menu_questionnaire">Questionnaire</string>
     <string name="menu_tips">Tips</string>
+    <string name="menu_log_out">Log out</string>
 </resources>
