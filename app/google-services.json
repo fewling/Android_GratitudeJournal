@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "835599180862",
+    "project_id": "gratitude-journal-817b6",
+    "storage_bucket": "gratitude-journal-817b6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835599180862:android:9793ec292e3b02ed8e1d6f",
+        "android_client_info": {
+          "package_name": "com.example.gratitudejournal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "835599180862-b4088bo0oq4on8o16i1ebkpnbsf1i03d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqAP6xZ1rd43PCbhXP6rc-GfS6X69_EdE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "835599180862-b4088bo0oq4on8o16i1ebkpnbsf1i03d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
