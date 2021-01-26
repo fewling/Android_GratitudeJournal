@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_journal">
+
+    <fragment
+        android:id="@+id/nav_journal"
+        android:name="com.example.gratitudejournal.Activities.ui.journal.JournalFragment"
+        android:label="@string/menu_journal"
+        tools:layout="@layout/fragment_journal" />
+
+    <fragment
+        android:id="@+id/nav_breathe_exercise"
+        android:name="com.example.gratitudejournal.Activities.ui.breathe_exercise.BreatheExerciseFragment"
+        android:label="@string/menu_breathing_exercise"
+        tools:layout="@layout/fragment_breathing_exercise" />
+
+    <fragment
+        android:id="@+id/nav_questionnaire"
+        android:name="com.example.gratitudejournal.Activities.ui.questionnaire.QuestionnaireFragment"
+        android:label="@string/menu_questionnaire"
+        tools:layout="@layout/fragment_questionnaire" />
+
+    <fragment
+        android:id="@+id/nav_tip"
+        android:name="com.example.gratitudejournal.Activities.ui.tip.TipFragment"
+        android:label="@string/menu_tips"
+        tools:layout="@layout/fragment_tip" />
+</navigation>

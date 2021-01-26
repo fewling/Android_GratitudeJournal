@@ -86,7 +86,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+        Intent intent = new Intent(getApplicationContext(), NavDrawerActivity.class);
         startActivity(intent);
         finish();
     }

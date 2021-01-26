@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_journal"
+            android:icon="@drawable/ic_journal"
+            android:title="@string/menu_journal" />
+        <item
+            android:id="@+id/nav_breathe_exercise"
+            android:icon="@drawable/ic_breathe_exercise"
+            android:title="@string/menu_breathing_exercise" />
+        <item
+            android:id="@+id/nav_questionnaire"
+            android:icon="@drawable/ic_questionnaire"
+            android:title="@string/menu_questionnaire" />
+
+        <item
+            android:id="@+id/nav_tip"
+            android:icon="@drawable/ic_tip"
+            android:title="@string/menu_tips"/>
+    </group>
+</menu>
