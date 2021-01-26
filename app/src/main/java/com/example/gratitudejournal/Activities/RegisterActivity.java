@@ -93,14 +93,11 @@ public class RegisterActivity extends AppCompatActivity {
         mLoadingProgress.setVisibility(View.INVISIBLE);
 
         mImgUserPhoto = findViewById(R.id.regUserPhoto);
-        mImgUserPhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= 22) {
-                    checkAndRequestForPermission();
-                } else {
-                    openGallery();
-                }
+        mImgUserPhoto.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= 22) {
+                checkAndRequestForPermission();
+            } else {
+                openGallery();
             }
         });
 
@@ -121,11 +118,19 @@ public class RegisterActivity extends AppCompatActivity {
 
                             // Update user's profile picture and name
                             FirebaseUser currentUser = mAuth.getCurrentUser();
-                            updateUserInfo(name, pickedImgUri, currentUser);
+
+                            if (pickedImgUri != null) {
+                                updateUserInfo(name, pickedImgUri, currentUser);
+                            } else {
+                                Uri uri = Uri.parse("android.resource://com.example.gratitudejournal/drawable/ic_account");
+                                updateUserInfo(name, uri, currentUser);
+                            }
+
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             showMessage("Authentication failed.");
+                            showMessageLong(task.getException().getMessage());
                             mRegButton.setVisibility(View.VISIBLE);
                             mLoadingProgress.setVisibility(View.INVISIBLE);
 
@@ -135,6 +140,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     }
+
 
     private void updateUserInfo(String name, Uri pickedImgUri, FirebaseUser currentUser) {
 
@@ -149,34 +155,30 @@ public class RegisterActivity extends AppCompatActivity {
                 // Able to get image url
 
                 imageFilePath.getDownloadUrl()
-                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
+                        .addOnSuccessListener(uri -> {
 
-                        // uri contain user image url
+                            // uri contain user image url
+                            UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(name)
+                                    .setPhotoUri(uri)
+                                    .build();
 
-                        UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
-                                .setDisplayName(name)
-                                .setPhotoUri(uri)
-                                .build();
+                            currentUser.updateProfile(profileUpdate)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
 
-                        currentUser.updateProfile(profileUpdate)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-
-                                        if (task.isSuccessful()) {
-                                            // user info updated successfully
-                                            showMessage("Register complete");
-                                            updateUI();
-                                        } else {
-                                            showMessage("Register failed");
+                                            if (task.isSuccessful()) {
+                                                // user info updated successfully
+                                                showMessage("Register complete");
+                                                updateUI();
+                                            } else {
+                                                showMessage("Register failed");
+                                            }
                                         }
-                                    }
-                                });
+                                    });
 
-                    }
-                });
+                        });
 
 
             }
@@ -189,18 +191,6 @@ public class RegisterActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
         startActivity(intent);
         finish();
-    }
-
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            currentUser.reload();
-        }
     }
 
 
@@ -259,5 +249,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void showMessage(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showMessageLong(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 }
