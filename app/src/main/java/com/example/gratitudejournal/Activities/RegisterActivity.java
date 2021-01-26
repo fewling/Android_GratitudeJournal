@@ -14,23 +14,17 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.gratitudejournal.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -58,35 +52,32 @@ public class RegisterActivity extends AppCompatActivity {
         mUserPassword2 = findViewById(R.id.regPassword2);
 
         mRegButton = findViewById(R.id.regButton);
-        mRegButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mRegButton.setOnClickListener(v -> {
 
-                mRegButton.setVisibility(View.INVISIBLE);
-                mLoadingProgress.setVisibility(View.VISIBLE);
+            mRegButton.setVisibility(View.INVISIBLE);
+            mLoadingProgress.setVisibility(View.VISIBLE);
 
-                final String name = mUserName.getText().toString();
-                final String email = mUserEmail.getText().toString();
-                final String password = mUserPassword.getText().toString();
-                final String password2 = mUserPassword2.getText().toString();
+            final String name = mUserName.getText().toString();
+            final String email = mUserEmail.getText().toString();
+            final String password = mUserPassword.getText().toString();
+            final String password2 = mUserPassword2.getText().toString();
 
-                if (name.isEmpty() || email.isEmpty() || password.isEmpty() ||
-                        password2.isEmpty() || !password.equals(password2)) {
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty() ||
+                    password2.isEmpty() || !password.equals(password2)) {
 
-                    // Something goes wrong: all fields must be filled
-                    // we need to display an error message
-                    showMessage("Please verify all fields");
-                    mRegButton.setVisibility(View.VISIBLE);
-                    mLoadingProgress.setVisibility(View.INVISIBLE);
+                // Something goes wrong: all fields must be filled
+                // we need to display an error message
+                showMessage("Please verify all fields");
+                mRegButton.setVisibility(View.VISIBLE);
+                mLoadingProgress.setVisibility(View.INVISIBLE);
 
-                } else {
-                    // everything is ok and we can start creating user account
-                    createUserAccount(name, email, password);
-
-                }
-
+            } else {
+                // everything is ok and we can start creating user account
+                createUserAccount(name, email, password);
 
             }
+
+
         });
 
         mLoadingProgress = findViewById(R.id.regProgressBar);
@@ -108,33 +99,30 @@ public class RegisterActivity extends AppCompatActivity {
     private void createUserAccount(String name, String email, String password) {
 
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
 
-                            Log.d(TAG, "createUserWithEmail:success");
-                            showMessage("createUserWithEmail:success");
+                        Log.d(TAG, "createUserWithEmail:success");
+                        showMessage("createUserWithEmail:success");
 
-                            // Update user's profile picture and name
-                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                        // Update user's profile picture and name
+                        FirebaseUser currentUser = mAuth.getCurrentUser();
 
-                            if (pickedImgUri != null) {
-                                updateUserInfo(name, pickedImgUri, currentUser);
-                            } else {
-                                Uri uri = Uri.parse("android.resource://com.example.gratitudejournal/drawable/ic_account");
-                                updateUserInfo(name, uri, currentUser);
-                            }
-
+                        if (pickedImgUri != null) {
+                            updateUserInfo(name, pickedImgUri, currentUser);
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            showMessage("Authentication failed.");
-                            showMessageLong(task.getException().getMessage());
-                            mRegButton.setVisibility(View.VISIBLE);
-                            mLoadingProgress.setVisibility(View.INVISIBLE);
-
+                            Uri uri = Uri.parse("android.resource://com.example.gratitudejournal/drawable/ic_account");
+                            updateUserInfo(name, uri, currentUser);
                         }
+
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        showMessage("Authentication failed.");
+                        showMessageLong(task.getException().getMessage());
+                        mRegButton.setVisibility(View.VISIBLE);
+                        mLoadingProgress.setVisibility(View.INVISIBLE);
+
                     }
                 });
 
@@ -147,41 +135,35 @@ public class RegisterActivity extends AppCompatActivity {
         // First upload user photo to firebase storage and get url
         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("users_photos");
         StorageReference imageFilePath = storageReference.child(pickedImgUri.getLastPathSegment());
-        imageFilePath.putFile(pickedImgUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+        imageFilePath.putFile(pickedImgUri).addOnSuccessListener(taskSnapshot -> {
 
-                // Image uploaded successfully
-                // Able to get image url
+            // Image uploaded successfully
+            // Able to get image url
 
-                imageFilePath.getDownloadUrl()
-                        .addOnSuccessListener(uri -> {
+            imageFilePath.getDownloadUrl()
+                    .addOnSuccessListener(uri -> {
 
-                            // uri contain user image url
-                            UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(name)
-                                    .setPhotoUri(uri)
-                                    .build();
+                        // uri contain user image url
+                        UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(name)
+                                .setPhotoUri(uri)
+                                .build();
 
-                            currentUser.updateProfile(profileUpdate)
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
+                        currentUser.updateProfile(profileUpdate)
+                                .addOnCompleteListener(task -> {
 
-                                            if (task.isSuccessful()) {
-                                                // user info updated successfully
-                                                showMessage("Register complete");
-                                                updateUI();
-                                            } else {
-                                                showMessage("Register failed");
-                                            }
-                                        }
-                                    });
+                                    if (task.isSuccessful()) {
+                                        // user info updated successfully
+                                        showMessage("Register complete");
+                                        updateUI();
+                                    } else {
+                                        showMessage("Register failed");
+                                    }
+                                });
 
-                        });
+                    });
 
 
-            }
         });
 
 
