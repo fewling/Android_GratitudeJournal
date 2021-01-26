@@ -18,9 +18,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 public class JournalFragment extends Fragment {
 
-    private static final String TAG = "JournalFragment";
     private JournalViewModel mJournalViewModel;
-
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
