@@ -1,18 +1,28 @@
 package com.example.gratitudejournal.Activities.ui.journal;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -22,12 +32,17 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class JournalFragment extends Fragment {
 
+    private static final int PERMISSION_REQUEST_CODE = 2;
+    private static final int GALLERY_INTENT_REQUEST_CODE = 2;
     private JournalViewModel mJournalViewModel;
     private Dialog popAddPost;
+    private ImageView mPopupPostImage;
+    private Uri pickedImgUri;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         iniPopup();
     }
 
@@ -39,6 +54,7 @@ public class JournalFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 popAddPost.show();
+                setupPopupImageClick();
             }
         });
 
@@ -70,5 +86,70 @@ public class JournalFragment extends Fragment {
         popAddPost.getWindow().setLayout(Toolbar.LayoutParams.MATCH_PARENT, Toolbar.LayoutParams.WRAP_CONTENT);
         popAddPost.getWindow().getAttributes().gravity = Gravity.BOTTOM;
         popAddPost.getWindow().getAttributes().windowAnimations = R.style.Animation_Design_BottomSheetDialog;
+
+        mPopupPostImage = popAddPost.findViewById(R.id.popup_img_to_upload);
+    }
+
+    private void setupPopupImageClick() {
+
+        mPopupPostImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Open the gallery when this image got clicked
+                // Before opening the gallery, we need to check if out app have the access to user files
+                if (Build.VERSION.SDK_INT >= 22) {
+                    checkAndRequestForPermission();
+                } else {
+                    openGallery();
+                }
+            }
+        });
+    }
+
+
+    private void checkAndRequestForPermission() {
+
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                showMessage("Please accept for required permission");
+
+            } else {
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            openGallery();
+        }
+    }
+
+
+    private void openGallery() {
+        // TODO: open gallery intent and wait for user to pick an image
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        galleryIntent.setType("image/");
+        startActivityForResult(galleryIntent, GALLERY_INTENT_REQUEST_CODE);
+    }
+
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK && requestCode == GALLERY_INTENT_REQUEST_CODE
+                && data != null) {
+
+            // The user has successfully picked an image.
+            // We need to save its reference to a Uri variable.
+            pickedImgUri = data.getData();
+            mPopupPostImage.setImageURI(pickedImgUri);
+        }
+    }
+
+    private void showMessage(String msg) {
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
     }
 }
