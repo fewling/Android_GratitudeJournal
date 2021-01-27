@@ -1,6 +1,7 @@
 package com.example.gratitudejournal.Activities;
 
 import android.annotation.SuppressLint;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -29,8 +30,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.stfalcon.imageviewer.StfalconImageViewer;
+import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -59,8 +63,10 @@ public class PostDetailActivity extends AppCompatActivity {
         initializeViews();
         bindPostData();
         buttonAddComment();
+        imageEnlargeListener();
         setupCommentRecyclerView();
     }
+
 
     private void transparentStatueBar() {
         Window w = getWindow();
@@ -139,6 +145,23 @@ public class PostDetailActivity extends AppCompatActivity {
                 } else {
                     showMessage("You could not leave a blank comment.");
                 }
+            }
+        });
+    }
+
+    private void imageEnlargeListener() {
+
+        mPostImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri uri = Uri.parse(getIntent().getExtras().getString("post_image"));
+                Toast.makeText(PostDetailActivity.this, uri.toString(), Toast.LENGTH_SHORT).show();
+                new StfalconImageViewer.Builder<String>(PostDetailActivity.this, Collections.singletonList(uri.toString()), new ImageLoader<String>() {
+                    @Override
+                    public void loadImage(ImageView imageView, String imageUrl) {
+                        Glide.with(getApplicationContext()).load(imageUrl).into(imageView);
+                    }
+                }).show();
             }
         });
     }
