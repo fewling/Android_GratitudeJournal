@@ -3,6 +3,7 @@ package com.example.gratitudejournal.Activities.ui.journal;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -18,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,10 +27,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.gratitudejournal.Adapters.PostAdapter;
 import com.example.gratitudejournal.Models.Post;
 import com.example.gratitudejournal.R;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -38,8 +40,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -69,6 +74,7 @@ public class JournalFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         FloatingActionButton fab = view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,14 +94,17 @@ public class JournalFragment extends Fragment {
                 new ViewModelProvider(this).get(JournalViewModel.class);
         View root = inflater.inflate(R.layout.fragment_journal, container, false);
 
-        final TextView textView = root.findViewById(R.id.text_journal);
+        mPostList = new LinkedList<>();
+        mRecyclerView = root.findViewById(R.id.recyclerView);
 
-        mJournalViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+//        final TextView textView = root.findViewById(R.id.text_journal);
+
+//        mJournalViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+//            @Override
+//            public void onChanged(@Nullable String s) {
+//                textView.setText(s);
+//            }
+//        });
 
         return root;
     }
@@ -144,10 +153,10 @@ public class JournalFragment extends Fragment {
 
     private void checkAndRequestForPermission() {
 
-        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(requireActivity().getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 showMessage("Please accept for required permission");
 
             } else {
@@ -227,7 +236,6 @@ public class JournalFragment extends Fragment {
                                             currentUser.getPhotoUrl().toString());
 
                                     addPost(post);
-
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -259,14 +267,16 @@ public class JournalFragment extends Fragment {
         post.setPostKey(key);
 
         // Add post data to firebase database
-        databaseReference.setValue(post).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                showMessage("Post Added");
-                mPopupProgressBar.setVisibility(View.INVISIBLE);
-                mPopupAddImage.setVisibility(View.VISIBLE);
-                popAddPost.dismiss();
-            }
+        databaseReference.setValue(post).addOnSuccessListener(aVoid -> {
+            showMessage("Post Added");
+            mPopupProgressBar.setVisibility(View.INVISIBLE);
+            mPopupAddImage.setVisibility(View.VISIBLE);
+
+            mPopupTitle.getText().clear();
+            mPopupDescription.getText().clear();
+            Glide.with(getActivity()).load(R.drawable.ic_add_photo).into(mPopupPostImage);
+
+            popAddPost.dismiss();
         });
 
     }
