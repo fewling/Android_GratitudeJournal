@@ -26,7 +26,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     ImageView mRowPostImg, mRowPostProfileImg;
     TextView mRowPostTitleTextView;
-    PostAdapter mAdapter;
 
     public PostAdapter(Context context, List<Post> posts) {
         mContext = context;
@@ -38,7 +37,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View mItemView = mInflater.inflate(R.layout.row_post_item, parent, false);
-        return new PostViewHolder(mItemView, this);
+        return new PostViewHolder(mItemView);
     }
 
     @Override
@@ -63,10 +62,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
 
-        public PostViewHolder(@NonNull View itemView, PostAdapter postAdapter) {
+        public PostViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            mAdapter = postAdapter;
             itemView.setOnClickListener(this);
 
             mRowPostImg = itemView.findViewById(R.id.row_post_img);
@@ -92,7 +90,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             intent.putExtra("author_photo", mPostList.get(position).getUserPhoto());
             intent.putExtra("description", mPostList.get(position).getDescription());
             intent.putExtra("post_key", mPostList.get(position).getPostKey());
-//            intent.putExtra("user_name", mPostList.get(position).getUsername());
+            intent.putExtra("user_name", mPostList.get(position).getUsername());
             long timestamp = (long) mPostList.get(position).getTimeStamp();
             intent.putExtra("timestamp", timestamp);
 

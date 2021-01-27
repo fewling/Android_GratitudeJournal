@@ -9,13 +9,18 @@ public class Comment {
     private String uImg;
     private String uName;
     private Object timestamp;
+    private String commentKey;
 
-    public Comment(String content, String uid, String uImg, String uName) {
+    public Comment() {
+    }
+
+    public Comment(String content, String uid, String uImg, String uName, String commentKey) {
         this.content = content;
         this.uid = uid;
         this.uImg = uImg;
         this.uName = uName;
         this.timestamp = ServerValue.TIMESTAMP;
+        this.commentKey = commentKey;
     }
 
     public String getContent() {
@@ -36,5 +41,13 @@ public class Comment {
 
     public Object getTimestamp() {
         return timestamp;
+    }
+
+    public String getCommentKey() {
+        return commentKey;
+    }
+
+    public void setCommentKey(String commentKey) {
+        this.commentKey = commentKey;
     }
 }

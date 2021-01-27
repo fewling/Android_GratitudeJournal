@@ -1,7 +1,5 @@
 package com.example.gratitudejournal.Models;
 
-import androidx.annotation.NonNull;
-
 import com.google.firebase.database.ServerValue;
 
 public class Post {
@@ -11,10 +9,11 @@ public class Post {
     private String picture;
     private String userId;
     private String userPhoto;
+    private String username;
     private Object timeStamp;
     private String postKey;
 
-    public Post(String title, String description, String picture, String userId, String userPhoto) {
+    public Post(String title, String description, String picture,String username, String userId, String userPhoto) {
         this.title = title;
         this.description = description;
         this.picture = picture;
@@ -59,9 +58,7 @@ public class Post {
         return timeStamp;
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return String.valueOf(title);
+    public String getUsername() {
+        return username;
     }
 }
