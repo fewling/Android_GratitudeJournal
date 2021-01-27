@@ -1,8 +1,7 @@
 package com.example.gratitudejournal.Adapters;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.net.Uri;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.gratitudejournal.Activities.PostDetailActivity;
 import com.example.gratitudejournal.Models.Post;
 import com.example.gratitudejournal.R;
 
@@ -78,12 +77,26 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         @Override
         public void onClick(View v) {
-            Dialog dialog = new Dialog(mContext);
-            dialog.setContentView(R.layout.show_large_image);
-            dialog.getWindow().setLayout(Toolbar.LayoutParams.MATCH_PARENT, Toolbar.LayoutParams.MATCH_PARENT);
-            ImageView imageView = dialog.findViewById(R.id.large_imageView);
-            Glide.with(mContext).load(Uri.parse(mPostList.get(getAdapterPosition()).getPicture())).into(imageView);
-            dialog.show();
+//            Dialog dialog = new Dialog(mContext);
+//            dialog.setContentView(R.layout.show_large_image);
+//            dialog.getWindow().setLayout(Toolbar.LayoutParams.MATCH_PARENT, Toolbar.LayoutParams.MATCH_PARENT);
+//            ImageView imageView = dialog.findViewById(R.id.large_imageView);
+//            Glide.with(mContext).load(Uri.parse(mPostList.get(getAdapterPosition()).getPicture())).into(imageView);
+//            dialog.show();
+
+            Intent intent = new Intent(mContext, PostDetailActivity.class);
+            int position = getAdapterPosition();
+
+            intent.putExtra("title", mPostList.get(position).getTitle());
+            intent.putExtra("post_image", mPostList.get(position).getPicture());
+            intent.putExtra("author_photo", mPostList.get(position).getUserPhoto());
+            intent.putExtra("description", mPostList.get(position).getDescription());
+            intent.putExtra("post_key", mPostList.get(position).getPostKey());
+//            intent.putExtra("user_name", mPostList.get(position).getUsername());
+            long timestamp = (long) mPostList.get(position).getTimeStamp();
+            intent.putExtra("timestamp", timestamp);
+
+            mContext.startActivity(intent);
         }
     }
 }
