@@ -69,6 +69,8 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     implementation 'androidx.multidex:multidex:2.0.1'
+
+    implementation 'com.github.stfalcon:stfalcon-imageviewer:1.0.10'
 }
 
 apply plugin: 'com.android.application'
