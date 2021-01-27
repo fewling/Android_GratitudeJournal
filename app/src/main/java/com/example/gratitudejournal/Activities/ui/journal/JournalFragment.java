@@ -14,7 +14,9 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,8 +29,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.gratitudejournal.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class JournalFragment extends Fragment {
 
@@ -36,7 +41,9 @@ public class JournalFragment extends Fragment {
     private static final int GALLERY_INTENT_REQUEST_CODE = 2;
     private JournalViewModel mJournalViewModel;
     private Dialog popAddPost;
-    private ImageView mPopupPostImage;
+    private ImageView mPopupPostImage, mPopupAddImage, mPopupUserPhoto;
+    private EditText mPopupTitle, mPopupDescription;
+    private ProgressBar mPopupProgressBar;
     private Uri pickedImgUri;
 
     @Override
@@ -55,6 +62,7 @@ public class JournalFragment extends Fragment {
             public void onClick(View view) {
                 popAddPost.show();
                 setupPopupImageClick();
+                setupPopupAddClick();
             }
         });
 
@@ -88,6 +96,19 @@ public class JournalFragment extends Fragment {
         popAddPost.getWindow().getAttributes().windowAnimations = R.style.Animation_Design_BottomSheetDialog;
 
         mPopupPostImage = popAddPost.findViewById(R.id.popup_img_to_upload);
+        mPopupTitle = popAddPost.findViewById(R.id.popup_title);
+        mPopupDescription = popAddPost.findViewById(R.id.popup_description);
+        mPopupAddImage = popAddPost.findViewById(R.id.popup_add);
+
+        mPopupProgressBar = popAddPost.findViewById(R.id.popup_progressBar);
+        mPopupProgressBar.setVisibility(View.INVISIBLE);
+
+        mPopupUserPhoto = popAddPost.findViewById(R.id.popup_user_image);
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        assert currentUser != null;
+        Glide.with(this)
+                .load(currentUser.getPhotoUrl())
+                .into(mPopupUserPhoto);
     }
 
     private void setupPopupImageClick() {
@@ -134,7 +155,7 @@ public class JournalFragment extends Fragment {
         startActivityForResult(galleryIntent, GALLERY_INTENT_REQUEST_CODE);
     }
 
-    
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -149,7 +170,38 @@ public class JournalFragment extends Fragment {
         }
     }
 
+
+    private void setupPopupAddClick() {
+        mPopupAddImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                mPopupAddImage.setVisibility(View.INVISIBLE);
+                mPopupProgressBar.setVisibility(View.VISIBLE);
+
+                // Make sure all input fields filled and image selected
+                if (mPopupTitle.getText().toString().isEmpty()
+                        || mPopupDescription.getText().toString().isEmpty()
+                        || pickedImgUri == null) {
+
+                    // Ask user to verify all fields...
+                    showMessage("Please verify all fields");
+                    mPopupProgressBar.setVisibility(View.INVISIBLE);
+                    mPopupAddImage.setVisibility(View.VISIBLE);
+
+                } else {
+                    // Everything is okay
+                    // TODO: Create Post Object and add it to firebase database
+
+
+                }
+
+            }
+        });
+    }
+
+
     private void showMessage(String msg) {
-        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireActivity().getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 }
