@@ -2,18 +2,17 @@ package com.example.gratitudejournal.Models;
 
 import com.google.firebase.database.ServerValue;
 
-import java.util.UUID;
-
 public class Post {
 
     private String title;
     private String description;
     private String picture;
-    private UUID userId;
+    private String userId;
     private String userPhoto;
     private Object timeStamp;
+    private String postKey;
 
-    public Post(String title, String description, String picture, UUID userId, String userPhoto, Object timeStamp) {
+    public Post(String title, String description, String picture, String userId, String userPhoto) {
         this.title = title;
         this.description = description;
         this.picture = picture;
@@ -24,6 +23,14 @@ public class Post {
 
     public Post() {
 
+    }
+
+    public String getPostKey() {
+        return postKey;
+    }
+
+    public void setPostKey(String postKey) {
+        this.postKey = postKey;
     }
 
     public String getTitle() {
@@ -38,7 +45,7 @@ public class Post {
         return picture;
     }
 
-    public UUID getUserId() {
+    public String getUserId() {
         return userId;
     }
 

@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,21 +31,33 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.example.gratitudejournal.Models.Post;
 import com.example.gratitudejournal.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.util.Objects;
 
 public class JournalFragment extends Fragment {
 
     private static final int PERMISSION_REQUEST_CODE = 2;
     private static final int GALLERY_INTENT_REQUEST_CODE = 2;
+    private static final String TAG = "JournalFragment";
     private JournalViewModel mJournalViewModel;
     private Dialog popAddPost;
     private ImageView mPopupPostImage, mPopupAddImage, mPopupUserPhoto;
     private EditText mPopupTitle, mPopupDescription;
     private ProgressBar mPopupProgressBar;
     private Uri pickedImgUri;
+    private FirebaseUser currentUser;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,7 +117,7 @@ public class JournalFragment extends Fragment {
         mPopupProgressBar.setVisibility(View.INVISIBLE);
 
         mPopupUserPhoto = popAddPost.findViewById(R.id.popup_user_image);
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         assert currentUser != null;
         Glide.with(this)
                 .load(currentUser.getPhotoUrl())
@@ -193,11 +206,69 @@ public class JournalFragment extends Fragment {
                     // Everything is okay
                     // TODO: Create Post Object and add it to firebase database
 
+                    // First upload the post image
+                    // access firebase storage
+                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("blog_images");
+                    StorageReference imageFilePath = storageReference.child(pickedImgUri.getLastPathSegment());
+                    imageFilePath.putFile(pickedImgUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    String imageDownloadLink = uri.toString();
+                                    // Create Post object
+
+                                    Post post = new Post(mPopupTitle.getText().toString(),
+                                            mPopupDescription.getText().toString(),
+                                            imageDownloadLink,
+                                            currentUser.getUid(),
+                                            currentUser.getPhotoUrl().toString());
+
+                                    addPost(post);
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Something goes wrong
+                                    Log.e(TAG, Objects.requireNonNull(e.getMessage()));
+                                    showMessage(e.getMessage());
+                                    mPopupProgressBar.setVisibility(View.INVISIBLE);
+                                    mPopupAddImage.setVisibility(View.VISIBLE);
+                                }
+                            });
+                        }
+                    });
+
 
                 }
 
             }
         });
+    }
+
+    private void addPost(Post post) {
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference databaseReference = database.getReference("Posts").push();
+
+        // Get post unique ID and update post key
+        String key = databaseReference.getKey();
+        post.setPostKey(key);
+
+        // Add post data to firebase database
+        databaseReference.setValue(post).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                showMessage("Post Added");
+                mPopupProgressBar.setVisibility(View.INVISIBLE);
+                mPopupAddImage.setVisibility(View.VISIBLE);
+                popAddPost.dismiss();
+            }
+        });
+
     }
 
 
