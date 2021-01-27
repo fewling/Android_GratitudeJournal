@@ -49,6 +49,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 public class JournalFragment extends Fragment {
@@ -63,6 +67,10 @@ public class JournalFragment extends Fragment {
     private ProgressBar mPopupProgressBar;
     private Uri pickedImgUri;
     private FirebaseUser currentUser;
+    private RecyclerView mRecyclerView;
+    private PostAdapter mAdapter;
+    private List<Post> mPostList;
+    private Context mContext;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,14 +84,42 @@ public class JournalFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         FloatingActionButton fab = view.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(view1 -> {
+            popAddPost.show();
+            setupPopupImageClick();
+            setupPopupAddClick();
+        });
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference databaseReference = firebaseDatabase.getReference("Posts");
+        // Attach a listener to read the data at our posts reference
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View view) {
-                popAddPost.show();
-                setupPopupImageClick();
-                setupPopupAddClick();
+            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
+                mPostList.clear();
+
+                for (DataSnapshot postsnap : dataSnapshot.getChildren()) {
+                    Post post = postsnap.getValue(Post.class);
+                    mPostList.add(post);
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NotNull DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
             }
         });
+
+        mAdapter = new PostAdapter(getActivity(), mPostList);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(requireActivity().getApplicationContext()));
 
     }
 

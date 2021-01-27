@@ -1,5 +1,7 @@
 package com.example.gratitudejournal.Models;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.database.ServerValue;
 
 public class Post {
@@ -55,5 +57,11 @@ public class Post {
 
     public Object getTimeStamp() {
         return timeStamp;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return String.valueOf(title);
     }
 }
