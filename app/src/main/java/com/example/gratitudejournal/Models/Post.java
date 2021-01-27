@@ -17,6 +17,7 @@ public class Post {
         this.title = title;
         this.description = description;
         this.picture = picture;
+        this.username = username;
         this.userId = userId;
         this.userPhoto = userPhoto;
         this.timeStamp = ServerValue.TIMESTAMP;

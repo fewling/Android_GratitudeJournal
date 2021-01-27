@@ -63,11 +63,11 @@ public class RegisterActivity extends AppCompatActivity {
             final String password2 = mUserPassword2.getText().toString();
 
             if (name.isEmpty() || email.isEmpty() || password.isEmpty() ||
-                    password2.isEmpty() || !password.equals(password2)) {
+                    password2.isEmpty() || !password.equals(password2) || pickedImgUri == null) {
 
                 // Something goes wrong: all fields must be filled
                 // we need to display an error message
-                showMessage("Please verify all fields");
+                showMessage("Please verify all fields, including profile image.");
                 mRegButton.setVisibility(View.VISIBLE);
                 mLoadingProgress.setVisibility(View.INVISIBLE);
 

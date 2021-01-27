@@ -61,6 +61,7 @@ public class PostDetailActivity extends AppCompatActivity {
         buttonAddComment();
         setupCommentRecyclerView();
     }
+
     private void transparentStatueBar() {
         Window w = getWindow();
         w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
@@ -148,6 +149,8 @@ public class PostDetailActivity extends AppCompatActivity {
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                mCommentList.clear();
+
                 for (DataSnapshot commentSnapshot : snapshot.getChildren()) {
                     Comment comment = commentSnapshot.getValue(Comment.class);
                     mCommentList.add(comment);
