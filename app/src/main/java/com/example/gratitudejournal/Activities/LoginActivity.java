@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateUI(FirebaseUser currentUser) {
-        Intent intent = new Intent(getApplicationContext(), NavDrawerActivity.class);
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
         intent.putExtra("current_user", currentUser);
         startActivity(intent);
         finish();
