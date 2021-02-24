@@ -3,10 +3,13 @@ package com.example.gratitudejournal.Adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +18,10 @@ import com.bumptech.glide.Glide;
 import com.example.gratitudejournal.Activities.PostDetailActivity;
 import com.example.gratitudejournal.Models.Post;
 import com.example.gratitudejournal.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
@@ -58,14 +65,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return position;
     }
 
+    public class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener {
 
-    public class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
+        String postKey = null;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
 
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
 
             mRowPostImg = itemView.findViewById(R.id.row_post_img);
             mRowPostProfileImg = itemView.findViewById(R.id.row_post_profile_img);
@@ -95,6 +103,49 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             intent.putExtra("timestamp", timestamp);
 
             mContext.startActivity(intent);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            showPopupMenu(v);
+            int position = getAdapterPosition();
+            Post post = mPostList.get(position);
+            postKey = post.getPostKey();
+            return true;
+        }
+
+        private void showPopupMenu(View v) {
+            PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
+            popupMenu.inflate(R.menu.list_popup_menu);
+            popupMenu.setOnMenuItemClickListener(this);
+            popupMenu.show();
+        }
+
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.delete_option:
+                    // deletes the post in Firebase:
+                    if (postKey != null) {
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference databaseReference = database.getReference("Posts").child(postKey);
+                        databaseReference.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(mContext, "Deleted successfully", Toast.LENGTH_SHORT).show();
+                                postKey = null;
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(mContext, "Failed deletion.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    break;
+            }
+            return false;
         }
     }
 }

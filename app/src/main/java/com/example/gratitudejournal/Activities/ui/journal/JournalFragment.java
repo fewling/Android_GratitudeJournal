@@ -27,6 +27,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,6 +38,7 @@ import com.example.gratitudejournal.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -118,6 +120,31 @@ public class JournalFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(requireActivity().getApplicationContext()));
 
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                Post post = mPostList.get(viewHolder.getAdapterPosition());
+                String postKey = post.getPostKey();
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference databaseReference = database.getReference("Posts").child(postKey);
+                databaseReference.removeValue().addOnSuccessListener(aVoid -> {
+                    mAdapter.notifyDataSetChanged();
+
+                    // Undo Snackbar:
+                    Snackbar.make(mRecyclerView, "Item deleted", Snackbar.LENGTH_LONG).setAction("Undo",
+                            v -> {
+                                databaseReference.setValue(post);
+                                mAdapter.notifyDataSetChanged();
+                            }).show();
+
+                }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed deletion.", Toast.LENGTH_SHORT).show());
+            }
+        }).attachToRecyclerView(mRecyclerView);
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
