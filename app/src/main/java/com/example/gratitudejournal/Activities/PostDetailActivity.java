@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,8 +22,7 @@ import com.bumptech.glide.Glide;
 import com.example.gratitudejournal.Adapters.CommentAdapter;
 import com.example.gratitudejournal.Models.Comment;
 import com.example.gratitudejournal.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -31,7 +31,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.stfalcon.imageviewer.StfalconImageViewer;
-import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -112,57 +111,41 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private void buttonAddComment() {
         postKey = getIntent().getExtras().getString("post_key");
-        mCommentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mCommentButton.setOnClickListener(v -> {
 
-                if (!mCommentEditText.getText().toString().isEmpty()) {
+            if (!mCommentEditText.getText().toString().isEmpty()) {
 
-                    mCommentButton.setVisibility(View.INVISIBLE);
-                    // Get post unique ID and update post key
-                    DatabaseReference commentReference = mFirebaseDatabase.getReference("Posts/" + postKey + "/Comment").push();
-                    String comment_content = mCommentEditText.getText().toString();
-                    String uid = mCurrentUser.getUid();
-                    String uname = mCurrentUser.getDisplayName();
-                    String uimg = mCurrentUser.getPhotoUrl().toString();
-                    String key = commentReference.getKey();
+                mCommentButton.setVisibility(View.INVISIBLE);
+                // Get post unique ID and update post key
+                DatabaseReference commentReference = mFirebaseDatabase.getReference("Posts/" + postKey + "/Comment").push();
+                String comment_content = mCommentEditText.getText().toString();
+                String uid = mCurrentUser.getUid();
+                String uname = mCurrentUser.getDisplayName();
+                String uimg = mCurrentUser.getPhotoUrl().toString();
+                String key = commentReference.getKey();
 
-                    Comment comment = new Comment(comment_content, uid, uimg, uname, key);
+                Comment comment = new Comment(comment_content, uid, uimg, uname, key);
 
-                    commentReference.setValue(comment).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            mCommentEditText.getText().clear();
-                            showMessage(" Comment added");
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            showMessage("Fail to add comment." + e.getMessage());
-                        }
-                    });
-                    mCommentButton.setVisibility(View.VISIBLE);
-                } else {
-                    showMessage("You could not leave a blank comment.");
-                }
+                commentReference.setValue(comment).addOnSuccessListener(aVoid -> {
+                    mCommentEditText.getText().clear();
+                    showMessage(" Comment added");
+                }).addOnFailureListener(e -> showMessage("Fail to add comment." + e.getMessage()));
+                mCommentButton.setVisibility(View.VISIBLE);
+            } else {
+                showMessage("You could not leave a blank comment.");
             }
         });
     }
 
     private void imageEnlargeListener() {
 
-        mPostImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Uri uri = Uri.parse(getIntent().getExtras().getString("post_image"));
-                Toast.makeText(PostDetailActivity.this, uri.toString(), Toast.LENGTH_SHORT).show();
-                new StfalconImageViewer.Builder<String>(PostDetailActivity.this, Collections.singletonList(uri.toString()), new ImageLoader<String>() {
-                    @Override
-                    public void loadImage(ImageView imageView, String imageUrl) {
-                        Glide.with(getApplicationContext()).load(imageUrl).into(imageView);
-                    }
-                }).show();
-            }
+        mPostImg.setOnClickListener(v -> {
+            Uri uri = Uri.parse(getIntent().getExtras().getString("post_image"));
+            Toast.makeText(PostDetailActivity.this, uri.toString(), Toast.LENGTH_SHORT).show();
+            new StfalconImageViewer.Builder<>(PostDetailActivity.this,
+                    Collections.singletonList(uri.toString()),
+                    (imageView, imageUrl) ->
+                            Glide.with(getApplicationContext()).load(imageUrl).into(imageView)).show();
         });
     }
 
@@ -186,10 +169,36 @@ public class PostDetailActivity extends AppCompatActivity {
             }
         });
 
-        mCommentRecyclerView = findViewById(R.id.post_detail_comment_recyclerviewr);
+        mCommentRecyclerView = findViewById(R.id.post_detail_comment_recyclerview);
         mCommentAdapter = new CommentAdapter(PostDetailActivity.this, mCommentList);
         mCommentRecyclerView.setAdapter(mCommentAdapter);
         mCommentRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                Comment comment = mCommentList.get(viewHolder.getAdapterPosition());
+                String commentKey = comment.getCommentKey();
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference databaseReference = database.getReference("Posts/" + postKey + "/Comment").child(commentKey);
+                databaseReference.removeValue().addOnSuccessListener(aVoid -> {
+
+                    mCommentAdapter.notifyDataSetChanged();
+
+                    // Undo Snackbar:
+                    Snackbar.make(mCommentRecyclerView, "Item deleted", Snackbar.LENGTH_LONG).setAction("Undo",
+                            v -> {
+                                databaseReference.setValue(comment);
+                                mCommentAdapter.notifyDataSetChanged();
+                            }).show();
+                }).addOnFailureListener(e -> Toast.makeText(PostDetailActivity.this, "Failed deletion", Toast.LENGTH_SHORT).show());
+            }
+        }).attachToRecyclerView(mCommentRecyclerView);
     }
 
     private void showMessage(String msg) {

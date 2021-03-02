@@ -35,8 +35,6 @@ import com.bumptech.glide.Glide;
 import com.example.gratitudejournal.Adapters.PostAdapter;
 import com.example.gratitudejournal.Models.Post;
 import com.example.gratitudejournal.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,7 +46,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -195,17 +192,14 @@ public class JournalFragment extends Fragment {
 
     private void setupPopupImageClick() {
 
-        mPopupPostImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mPopupPostImage.setOnClickListener(v -> {
 
-                // Open the gallery when this image got clicked
-                // Before opening the gallery, we need to check if out app have the access to user files
-                if (Build.VERSION.SDK_INT >= 22) {
-                    checkAndRequestForPermission();
-                } else {
-                    openGallery();
-                }
+            // Open the gallery when this image got clicked
+            // Before opening the gallery, we need to check if out app have the access to user files
+            if (Build.VERSION.SDK_INT >= 22) {
+                checkAndRequestForPermission();
+            } else {
+                openGallery();
             }
         });
     }
@@ -250,67 +244,54 @@ public class JournalFragment extends Fragment {
     }
 
     private void setupPopupAddClick() {
-        mPopupAddImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mPopupAddImage.setOnClickListener(v -> {
 
-                mPopupAddImage.setVisibility(View.INVISIBLE);
-                mPopupProgressBar.setVisibility(View.VISIBLE);
+            mPopupAddImage.setVisibility(View.INVISIBLE);
+            mPopupProgressBar.setVisibility(View.VISIBLE);
 
-                // Make sure all input fields filled and image selected
-                if (mPopupTitle.getText().toString().isEmpty()
-                        || mPopupDescription.getText().toString().isEmpty()
-                        || pickedImgUri == null) {
+            // Make sure all input fields filled and image selected
+            if (mPopupTitle.getText().toString().isEmpty()
+                    || mPopupDescription.getText().toString().isEmpty()
+                    || pickedImgUri == null) {
 
-                    // Ask user to verify all fields...
-                    showMessage("Please verify all fields");
-                    mPopupProgressBar.setVisibility(View.INVISIBLE);
-                    mPopupAddImage.setVisibility(View.VISIBLE);
+                // Ask user to verify all fields...
+                showMessage("Please verify all fields");
+                mPopupProgressBar.setVisibility(View.INVISIBLE);
+                mPopupAddImage.setVisibility(View.VISIBLE);
 
-                } else {
-                    // Everything is okay
-                    // TODO: Create Post Object and add it to firebase database
+            } else {
+                // Everything is okay
+                // TODO: Create Post Object and add it to firebase database
 
-                    // First upload the post image
-                    // access firebase storage
-                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("blog_images");
-                    StorageReference imageFilePath = storageReference.child(pickedImgUri.getLastPathSegment());
-                    imageFilePath.putFile(pickedImgUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // First upload the post image
+                // access firebase storage
+                StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("blog_images");
+                StorageReference imageFilePath = storageReference.child(pickedImgUri.getLastPathSegment());
+                imageFilePath.putFile(pickedImgUri).addOnSuccessListener(taskSnapshot ->
+                        imageFilePath.getDownloadUrl().addOnSuccessListener(uri -> {
+                            String imageDownloadLink = uri.toString();
+                            // Create Post object
 
-                            imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    String imageDownloadLink = uri.toString();
-                                    // Create Post object
+                            Post post = new Post(mPopupTitle.getText().toString(),
+                                    mPopupDescription.getText().toString(),
+                                    imageDownloadLink,
+                                    currentUser.getDisplayName(),
+                                    currentUser.getUid(),
+                                    currentUser.getPhotoUrl().toString());
 
-                                    Post post = new Post(mPopupTitle.getText().toString(),
-                                            mPopupDescription.getText().toString(),
-                                            imageDownloadLink,
-                                            currentUser.getDisplayName(),
-                                            currentUser.getUid(),
-                                            currentUser.getPhotoUrl().toString());
-
-                                    addPost(post);
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
+                            addPost(post);
+                        }).
+                                addOnFailureListener(e -> {
                                     // Something goes wrong
                                     Log.e(TAG, Objects.requireNonNull(e.getMessage()));
                                     showMessage(e.getMessage());
                                     mPopupProgressBar.setVisibility(View.INVISIBLE);
                                     mPopupAddImage.setVisibility(View.VISIBLE);
-                                }
-                            });
-                        }
-                    });
+                                }));
 
-
-                }
 
             }
+
         });
     }
 

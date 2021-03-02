@@ -23,7 +23,6 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:lineSpacingExtra="4sp"
-        android:text="TextView"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -50,8 +49,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:textSize="10sp"
-        android:text="Date and Author"
+        android:textSize="12sp"
+        android:text="@string/date_and_author"
         app:layout_constraintEnd_toStartOf="@+id/post_detail_author_photo"
         app:layout_constraintStart_toStartOf="@+id/view"
         app:layout_constraintTop_toBottomOf="@+id/view" />
@@ -95,7 +94,7 @@
         android:layout_marginEnd="16dp"
         android:background="@drawable/edittext_button_style_rounded"
         android:ems="10"
-        android:hint="Write Comment"
+        android:hint="@string/write_comment"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toBottomOf="@+id/post_detail_currentuser_photo"
         app:layout_constraintEnd_toStartOf="@+id/post_detail_add_comment_button"
@@ -107,13 +106,13 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginEnd="16dp"
-        android:text="Add"
+        android:text="@string/add"
         app:layout_constraintBottom_toBottomOf="@+id/post_detail_comment_edittext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/post_detail_comment_edittext" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/post_detail_comment_recyclerviewr"
+        android:id="@+id/post_detail_comment_recyclerview"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
