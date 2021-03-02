@@ -18,4 +18,10 @@
     <string name="date_and_author">Date and Author</string>
     <string name="write_comment">Write Comment</string>
     <string name="add">Add</string>
+    <string name="breathe_exercise_time">Time in minute(s)</string>
+    <string name="start_btn">Start</string>
+    <string name="stop_btn">Stop</string>
+    <string name="_2_minutes_btn">2 Minutes</string>
+    <string name="_10_minutes_btn">10 Minutes</string>
+    <string name="_20_minutes_btn">20 Minutes</string>
 </resources>

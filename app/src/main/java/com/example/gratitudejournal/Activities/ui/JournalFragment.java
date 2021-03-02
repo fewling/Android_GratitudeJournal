@@ -1,4 +1,4 @@
-package com.example.gratitudejournal.Activities.ui.journal;
+package com.example.gratitudejournal.Activities.ui;
 
 import android.Manifest;
 import android.app.Activity;
@@ -26,7 +26,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,7 +57,6 @@ public class JournalFragment extends Fragment {
     private static final int PERMISSION_REQUEST_CODE = 2;
     private static final int GALLERY_INTENT_REQUEST_CODE = 2;
     private static final String TAG = "JournalFragment";
-    private JournalViewModel mJournalViewModel;
     private Dialog popAddPost;
     private ImageView mPopupPostImage, mPopupAddImage, mPopupUserPhoto;
     private EditText mPopupTitle, mPopupDescription;
@@ -117,7 +115,7 @@ public class JournalFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(requireActivity().getApplicationContext()));
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
@@ -131,7 +129,6 @@ public class JournalFragment extends Fragment {
                 DatabaseReference databaseReference = database.getReference("Posts").child(postKey);
                 databaseReference.removeValue().addOnSuccessListener(aVoid -> {
                     mAdapter.notifyDataSetChanged();
-
                     // Undo Snackbar:
                     Snackbar.make(mRecyclerView, "Item deleted", Snackbar.LENGTH_LONG).setAction("Undo",
                             v -> {
@@ -147,8 +144,6 @@ public class JournalFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        mJournalViewModel =
-                new ViewModelProvider(this).get(JournalViewModel.class);
         View root = inflater.inflate(R.layout.fragment_journal, container, false);
 
         mPostList = new LinkedList<>();

@@ -4,19 +4,85 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.ui.breathe_exercise.BreatheExerciseFragment">
+    tools:context=".Activities.ui.BreatheExerciseFragment">
 
-    <TextView
-        android:id="@+id/text_breathe_exercise"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <ProgressBar
+        android:id="@+id/breathe_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:progress="80"
+        android:rotation="-90"
+        android:scaleY="50"
+        app:layout_constraintBottom_toTopOf="@+id/breathe_time_edittext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/breathe_start_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/start_btn"
+        app:layout_constraintEnd_toStartOf="@+id/breathe_stop_button"
+        app:layout_constraintTop_toTopOf="@+id/breathe_time_edittext" />
+
+    <Button
+        android:id="@+id/breathe_stop_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/stop_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/breathe_start_button" />
+
+    <Button
+        android:id="@+id/_2_min_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/_2_minutes_btn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/breathe_time_edittext"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:autofillHints="@string/breathe_exercise_time"
+        android:ems="10"
+        android:text="1"
+        android:inputType="numberSigned"
+        app:layout_constraintBottom_toTopOf="@+id/_2_min_button"
+        app:layout_constraintEnd_toStartOf="@+id/breathe_start_button"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/_10_min_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/_10_minutes_btn"
+        app:layout_constraintEnd_toStartOf="@+id/_20_min_button"
+        app:layout_constraintStart_toEndOf="@+id/_2_min_button"
+        app:layout_constraintTop_toTopOf="@+id/_2_min_button" />
+
+    <Button
+        android:id="@+id/_20_min_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/_20_minutes_btn"
+        app:layout_constraintBottom_toBottomOf="@+id/_2_min_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/_10_min_button" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
